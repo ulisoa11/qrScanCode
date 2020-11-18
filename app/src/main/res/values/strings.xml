@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">LectorQr</string>
+    <string name="title_button">Lector QR</string>
 </resources>

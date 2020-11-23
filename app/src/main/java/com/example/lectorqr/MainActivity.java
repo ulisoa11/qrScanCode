@@ -59,14 +59,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Se ha autenticado como: " + result.getContents(), Toast.LENGTH_LONG).show();
                 this.openScan();
-
-                if(readDatabase(result)){
-
-                   // Toast.makeText(this, "se pudo leer firebase", Toast.LENGTH_LONG).show();
-
-                }else {
-                    Toast.makeText(this, "Favor registrarse", Toast.LENGTH_LONG).show();
-                }
+                readDatabaseUser(result.getContents());
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -88,29 +81,23 @@ public class MainActivity extends AppCompatActivity {
        myRef.setValue("1234567890");
     }
 
-    public boolean readDatabase( IntentResult result){
+    public boolean readDatabaseUser(String result){
 
-        myRefUsers.child(result.getContents()).addValueEventListener(new ValueEventListener() {
+        myRefUsers.child(result).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 //String value = dataSnapshot.getValue(String.class);
                 //Log.d(TAG, "Value is: " + value);
-
                 Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
-
                 Log.d(TAG, "Value is: " + map);
                 if(map!=null){
-                    Log.d(TAG, "Se encontró registro: " + map);
-
-                   insertDateToFirebase(result.getContents());
-
+                    //Log.d(TAG, "Se encontró registro: " + map);
+                    insertDateToFirebase(result);
                 }else {
-                    Log.d(TAG, "NO se encontró registro: " + result.getContents());
+                    Log.d(TAG, "NO se encontró registro: " + result);
                 }
-
             }
-
             @Override
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
@@ -120,20 +107,59 @@ public class MainActivity extends AppCompatActivity {
             return true;
     }
 
+    public void validateChild(String uid){
+        myRef.child(uid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+            }
+        });
+    }
+
+
     public void insertDateToFirebase(String uid ) {
+        myRef.child(uid).child(currentDate()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Asistencia post = dataSnapshot.getValue(Asistencia.class);
+                if(post ==null){
+                    insertInput(uid);
+                }else{
+                    insertOutput(uid);
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        });
+    }
 
-            //obtener fecha del dia
-            SimpleDateFormat dt = new SimpleDateFormat("dd-MM-yyyy");
-            String stringdate,currentDateandTime;
-            stringdate=  dt.format(new Date());
+    public void insertInput(String uid){
+        myRef.child(uid).child(currentDate()).child("input").setValue(currentTime());
+        myRef.child(uid).child(currentDate()).child("output").setValue(currentTime());
 
-             //obtener hora
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
-            currentDateandTime = simpleDateFormat.format(new Date());
+    }
+    public void insertOutput(String uid){
+        myRef.child(uid).child(currentDate()).child("output").setValue(currentTime());
 
-           myRef.child(uid).child(stringdate).child("input").setValue(currentDateandTime);
+    }
+    public String currentDate(){
+        //obtener fecha del dia
+        SimpleDateFormat dt = new SimpleDateFormat("dd-MM-yyyy");
+        String stringdate,currentDateandTime;
+        stringdate=  dt.format(new Date());
+        return  stringdate;
+    }
 
-           Toast.makeText(this, "acceso registrado : ".toUpperCase() + stringdate + " a las : ".toUpperCase()+ currentDateandTime, Toast.LENGTH_LONG).show();
-
+    public String currentTime(){
+        //obtener hora
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+        return simpleDateFormat.format(new Date());
     }
 }

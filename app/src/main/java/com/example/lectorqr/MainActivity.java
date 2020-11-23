@@ -4,12 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -17,7 +14,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -40,14 +36,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-
-        buttonCamara.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                 openScan();
-
-            }
-        });
+        buttonCamara.setOnClickListener(view ->
+                openScan()
+        );
     }
 
     // Get the results:
@@ -64,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
-
     }
 
    public final void openScan(){
@@ -76,13 +66,7 @@ public class MainActivity extends AppCompatActivity {
        integrator.initiateScan();
    }
 
-   public final void writeDatabase(){
-
-       myRef.setValue("1234567890");
-    }
-
     public boolean readDatabaseUser(String result){
-
         myRefUsers.child(result).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -104,22 +88,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.w(TAG, "Failed to read value.", error.toException());
             }
         });
-            return true;
+        return true;
     }
-
-    public void validateChild(String uid){
-        myRef.child(uid).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-            }
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-            }
-        });
-    }
-
 
     public void insertDateToFirebase(String uid ) {
         myRef.child(uid).child(currentDate()).addValueEventListener(new ValueEventListener() {
@@ -143,12 +113,13 @@ public class MainActivity extends AppCompatActivity {
     public void insertInput(String uid){
         myRef.child(uid).child(currentDate()).child("input").setValue(currentTime());
         myRef.child(uid).child(currentDate()).child("output").setValue(currentTime());
-
     }
+
     public void insertOutput(String uid){
         myRef.child(uid).child(currentDate()).child("output").setValue(currentTime());
 
     }
+
     public String currentDate(){
         //obtener fecha del dia
         SimpleDateFormat dt = new SimpleDateFormat("dd-MM-yyyy");
